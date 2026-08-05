@@ -13,33 +13,30 @@ import webhookRouter from "./routes/webhook.route";
 
 const app = express();
 
-app.use("/api/webhook", webhookRouter);
-
-// app.use(
-//   cors({
-//     origin: envConfig.FRONTEND_ORIGIN,
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     credentials: true,
-//   })
-// );
+// --- CORS first, before any routes ---
+const FRONTEND_ORIGIN = envConfig.FRONTEND_ORIGIN || "http://localhost:5173";
 
 const corsOptions = {
-  origin: envConfig.FRONTEND_ORIGIN,
+  origin: FRONTEND_ORIGIN,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
-
-// Explicitly handle preflight for all routes
 app.options("*", cors(corsOptions));
+// -------------------------------------
 
+// Body & cookie parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
+// Webhook routes
+app.use("/api/webhook", webhookRouter);
+
+// Health check
 app.get(
   "/health",
   asyncHandler(async (_req, res) => {
@@ -50,11 +47,13 @@ app.get(
   })
 );
 
+// Main API routes
 app.use("/api", routes);
 
+// Error handler
 app.use(errorHandler);
 
-// Connect DB on cold start
+// DB connect
 if (process.env.VERCEL) {
   connectDatabase().catch((err) => {
     console.error("Failed to connect to database on Vercel startup:", err);
