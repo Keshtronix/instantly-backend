@@ -47,6 +47,13 @@ app.get(
   })
 );
 
+app.get(
+  "/test",
+  asyncHandler(async (_req, res) => {
+    res.status(HTTPSTATUS.OK).json({ ok: true, message: "test route works" });
+  })
+);
+
 // Main API routes
 app.use("/api", routes);
 
