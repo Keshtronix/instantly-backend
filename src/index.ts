@@ -13,7 +13,7 @@ import webhookRouter from "./routes/webhook.route";
 
 const app = express();
 
-// --- CORS first, before any routes ---
+// --- CORS first ---
 const FRONTEND_ORIGIN = envConfig.FRONTEND_ORIGIN || "http://localhost:5173";
 
 const corsOptions = {
@@ -25,9 +25,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
-// -------------------------------------
+// ------------------
 
-// Body & cookie parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -47,6 +46,7 @@ app.get(
   })
 );
 
+// Test route
 app.get(
   "/test",
   asyncHandler(async (_req, res) => {
@@ -57,17 +57,29 @@ app.get(
 // Main API routes
 app.use("/api", routes);
 
-// Error handler
 app.use(errorHandler);
 
-// DB connect
+// DB connection + start (works for both Vercel and local)
+let isDbReady = false;
+
+async function ensureDatabase() {
+  if (isDbReady) return;
+  await connectDatabase();
+  isDbReady = true;
+}
+
+// For Vercel: ensure DB before first request
 if (process.env.VERCEL) {
-  connectDatabase().catch((err) => {
+  ensureDatabase().catch((err) => {
     console.error("Failed to connect to database on Vercel startup:", err);
+    throw err; // let Vercel see the failure clearly
   });
-} else {
+}
+
+// For local: traditional listen
+if (!process.env.VERCEL) {
   app.listen(envConfig.PORT, async () => {
-    await connectDatabase();
+    await ensureDatabase();
     console.log(
       `Server running on port ${envConfig.PORT} in ${envConfig.NODE_ENV} mode`
     );
