@@ -13,29 +13,21 @@ import webhookRouter from "./routes/webhook.route";
 
 const app = express();
 
-// --- CORS first ---
-const FRONTEND_ORIGIN = envConfig.FRONTEND_ORIGIN || "http://localhost:5173";
+app.use("/api/webhook", webhookRouter);
 
-const corsOptions = {
-  origin: FRONTEND_ORIGIN,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-// ------------------
+app.use(
+  cors({
+    origin: envConfig.FRONTEND_ORIGIN,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
-// Webhook routes
-app.use("/api/webhook", webhookRouter);
-
-// Health check
 app.get(
   "/health",
   asyncHandler(async (_req, res) => {
@@ -43,45 +35,23 @@ app.get(
       message: "Server is running",
       status: "healthy",
     });
-  })
+  }),
 );
 
-// Test route
-app.get(
-  "/test",
-  asyncHandler(async (_req, res) => {
-    res.status(HTTPSTATUS.OK).json({ ok: true, message: "test route works" });
-  })
-);
-
-// Main API routes
 app.use("/api", routes);
 
 app.use(errorHandler);
 
-// DB connection + start (works for both Vercel and local)
-let isDbReady = false;
-
-async function ensureDatabase() {
-  if (isDbReady) return;
-  await connectDatabase();
-  isDbReady = true;
-}
-
-// For Vercel: ensure DB before first request
+// Connect DB on cold start
 if (process.env.VERCEL) {
-  ensureDatabase().catch((err) => {
+  connectDatabase().catch((err) => {
     console.error("Failed to connect to database on Vercel startup:", err);
-    throw err; // let Vercel see the failure clearly
   });
-}
-
-// For local: traditional listen
-if (!process.env.VERCEL) {
+} else {
   app.listen(envConfig.PORT, async () => {
-    await ensureDatabase();
+    await connectDatabase();
     console.log(
-      `Server running on port ${envConfig.PORT} in ${envConfig.NODE_ENV} mode`
+      `Server running on port ${envConfig.PORT} in ${envConfig.NODE_ENV} mode`,
     );
   });
 }
