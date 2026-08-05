@@ -17,3 +17,4 @@ export const envConfig = {
   
   FRONTEND_ORIGIN: getEnv("FRONTEND_ORIGIN"),
 };
+
