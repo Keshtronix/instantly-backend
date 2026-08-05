@@ -23,8 +23,8 @@ export const setJwtAuthCookie = ({ res, userId }: Cookie) => {
   return res.cookie(ACCESS_TOKEN_COOKIE, token, {
     httpOnly: true,
     secure: envConfig.NODE_ENV === "production",
-    sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
-
+   // sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: envConfig.NODE_ENV === "production" ? "none" : "lax",
     maxAge: SEVEN_DAYS,
   });
 };
@@ -33,7 +33,8 @@ export const clearJwtAuthCookie = (res: Response) => {
   return res.clearCookie(ACCESS_TOKEN_COOKIE, {
     httpOnly: true,
     secure: envConfig.NODE_ENV === "production",
-    sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    //sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: envConfig.NODE_ENV === "production" ? "none" : "lax",
   });
 };
 
@@ -42,7 +43,8 @@ export function setGuestCartCookie(res: Response, guestCartId: string) {
     maxAge: GUEST_CART_EXPIRY_DAYS,
     httpOnly: true,
     secure: envConfig.NODE_ENV === "production",
-    sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    //sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: envConfig.NODE_ENV === "production" ? "none" : "lax",
   });
 }
 
@@ -50,6 +52,7 @@ export function clearGuestCartCookie(res: Response) {
   return res.clearCookie(GUEST_CART_TOKEN_COOKIE, {
     httpOnly: true,
     secure: envConfig.NODE_ENV === "production",
-    sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    //sameSite: envConfig.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: envConfig.NODE_ENV === "production" ? "none" : "lax",
   });
 }
