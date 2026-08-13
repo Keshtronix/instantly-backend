@@ -33,7 +33,7 @@ export const registerController = asyncHandler(
 
     if (guestCartId) clearGuestCartCookie(res);
 
-    return setJwtAuthCookie({ res, userId }).status(HTTPSTATUS.CREATED).json({
+    return res.status(HTTPSTATUS.CREATED).json({
       message: "User registered successfully",
       user,
     });

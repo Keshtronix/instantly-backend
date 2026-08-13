@@ -37,3 +37,4 @@ export const PAYMENT_METHODS = {
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[keyof typeof PAYMENT_METHODS];
 export const PAYMENT_METHOD_VALUES = Object.values(PAYMENT_METHODS);
+
