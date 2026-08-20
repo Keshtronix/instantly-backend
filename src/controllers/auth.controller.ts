@@ -1,10 +1,15 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { HTTPSTATUS } from "../config/http.config";
-import { registerSchema, loginSchema } from "../validators/auth.validator";
+import {
+  registerSchema,
+  loginSchema,
+  updateProfileSchema,
+} from "../validators/auth.validator";
 import {
   loginAndMergeGuestCart,
   registerAndMergeGuestCart,
+  updateUserProfile,
 } from "../services/auth.service";
 import {
   setJwtAuthCookie,
@@ -12,11 +17,13 @@ import {
   clearGuestCartCookie,
 } from "../utils/cookie.util";
 import { USER_ROLES } from "../constants/enums";
+import UserModel from "../models/user.model";
 
 const toAuthUser = (user: any) => ({
   _id: String(user._id),
   name: user.name,
   email: user.email,
+  phone: user.phone ?? null,
   avatar: user.avatar ?? null,
   isAdmin: user.role === USER_ROLES.ADMIN,
   createdAt: user.createdAt,
@@ -37,7 +44,7 @@ export const registerController = asyncHandler(
       message: "User registered successfully",
       user,
     });
-  }
+  },
 );
 
 export const loginController = asyncHandler(
@@ -48,7 +55,7 @@ export const loginController = asyncHandler(
     const user = await loginAndMergeGuestCart(
       data.email,
       data.password,
-      guestCartId
+      guestCartId,
     );
     const userId = user._id.toString();
 
@@ -58,19 +65,37 @@ export const loginController = asyncHandler(
       message: "User logged in successfully",
       user,
     });
-  }
+  },
 );
 
-export const logoutController = asyncHandler(async (_req: Request, res: Response) => {
-  return clearJwtAuthCookie(res).status(HTTPSTATUS.OK).json({
-    message: "User logged out successfully",
-  });
-});
+export const logoutController = asyncHandler(
+  async (_req: Request, res: Response) => {
+    return clearJwtAuthCookie(res).status(HTTPSTATUS.OK).json({
+      message: "User logged out successfully",
+    });
+  },
+);
 
-export const authStatusController = asyncHandler(async (req: Request, res: Response) => {
-  const user = req.user;
-  res.status(HTTPSTATUS.OK).json({
-    message: "User is authenticated",
-    user: user ? toAuthUser(user): null,
-  });
-});
+export const authStatusController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    res.status(HTTPSTATUS.OK).json({
+      message: "User is authenticated",
+      user: user ? toAuthUser(user) : null,
+    });
+  },
+);
+
+export const updateProfileController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const data = updateProfileSchema.parse(req.body);
+    const userId = (req.user as any)._id.toString();
+
+    const user = await updateUserProfile(userId, data);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Profile updated successfully",
+      user: toAuthUser(user),
+    });
+  },
+);

@@ -1,5 +1,5 @@
 import UserModel from "../models/user.model";
-import { BadRequestException, UnauthorizedException } from "../utils/app-error";
+import { BadRequestException, UnauthorizedException,NotFoundException } from "../utils/app-error";
 import { RegisterInput, LoginInput } from "../validators/auth.validator";
 import { mergeGuestCartService } from "./cart.service";
 import VerificationCodeModel from "../models/verification.model";
@@ -74,4 +74,32 @@ export const loginAndMergeGuestCart = async (
   const user = await loginService({ email, password });
   await mergeGuestCartService(user._id.toString(), guestCartId);
   return user;
+};
+
+
+
+
+export const updateUserProfile = async (
+  userId: string,
+  data: { name: string; email: string; phone?: string }
+) => {
+  const existing = await UserModel.findOne({
+    email: data.email,
+    _id: { $ne: userId },
+  });
+  if (existing) {
+    throw new BadRequestException("Email is already in use");
+  }
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    userId,
+    { name: data.name, email: data.email, phone: data.phone },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new NotFoundException("User not found");
+  }
+
+  return updatedUser;
 };
