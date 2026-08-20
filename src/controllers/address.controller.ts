@@ -5,6 +5,7 @@ import { createAddressSchema } from "../validators/address.validator";
 import {
   createAddressService,
   getUserAddressesService,
+  deleteUserAddress
 } from "../services/address.service";
 
 export const createAddressController = asyncHandler(
@@ -28,6 +29,21 @@ export const getUserAddressesController = asyncHandler(
     res.status(HTTPSTATUS.OK).json({
       message: "Addresses retrieved successfully",
       ...result,
+    });
+  }
+);
+
+
+
+export const deleteAddressController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = (req.user as any)._id.toString();
+    const { id } = req.params;
+
+    await deleteUserAddress(userId, id);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Address deleted successfully",
     });
   }
 );
