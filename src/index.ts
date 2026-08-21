@@ -18,7 +18,7 @@ app.use("/api/webhook", webhookRouter);
 app.use(
   cors({
     origin: envConfig.FRONTEND_ORIGIN,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT","PATCH", "DELETE"],
     credentials: true,
   }),
 );

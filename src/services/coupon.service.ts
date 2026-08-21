@@ -31,13 +31,17 @@ export const getAllCouponsService = async ({
     CouponModel.countDocuments(),
   ]);
 
+  const totalPages = Math.ceil(total / limit);
+
   return {
     coupons,
     pagination: {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
     },
   };
 };
