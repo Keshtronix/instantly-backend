@@ -4,6 +4,7 @@ import { PAYMENT_METHOD_VALUES } from "../constants/enums";
 export const createOrderSchema = z.object({
   addressId: z.string().min(1, "Address ID is required"),
   paymentMethod: z.enum(PAYMENT_METHOD_VALUES as [string, ...string[]]),
+  couponCode: z.string().trim().optional(),
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

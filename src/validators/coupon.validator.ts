@@ -16,7 +16,14 @@ export const createCouponSchema = z
     },
   );
 
+export const applyCouponSchema = z.object({
+  code: z.string().trim().min(1, "Coupon code is required"),
+  subtotal: z.number().positive("Subtotal must be positive"),
+});
+
 export type CreateCouponInput = z.infer<typeof createCouponSchema>;
+
+//export type ApplyCouponInput = z.infer<typeof applyCouponSchema>;
 
 export const couponIdParamSchema = z.object({
   id: z.string().min(1, "Coupon ID is required"),

@@ -12,6 +12,9 @@ import {
   deleteCouponService,
 } from "../services/coupon.service";
 
+import { applyCouponSchema } from "../validators/coupon.validator";
+import { validateCouponForUserService } from "../services/coupon.service";
+
 export const createCouponController = asyncHandler(
   async (req: Request, res: Response) => {
     const data = createCouponSchema.parse(req.body);
@@ -57,6 +60,21 @@ export const deleteCouponController = asyncHandler(
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Coupon deleted successfully",
+    });
+  }
+);
+
+
+export const validateCouponController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { code, subtotal } = applyCouponSchema.parse(req.body);
+    const userId = (req.user as any)._id.toString();
+
+    const result = await validateCouponForUserService(userId, code, subtotal);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Coupon applied successfully",
+      ...result,
     });
   }
 );

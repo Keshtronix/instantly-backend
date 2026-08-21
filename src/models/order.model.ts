@@ -20,7 +20,7 @@ export interface IOrderItem {
   discountPercent: number;
   salePrice: number;
   quantity: number;
-  isReviewed: boolean
+  isReviewed: boolean;
 }
 
 export interface IOrderAddress {
@@ -48,6 +48,8 @@ export interface IOrder extends Document {
   paymentStatus: PaymentStatus;
   status: OrderStatus;
   statusHistory: IOrderStatusHistory[];
+  couponCode?: string;
+  discountAmount: number;
   subtotal: number;
   deliveryFee: number;
   tax: number;
@@ -56,22 +58,20 @@ export interface IOrder extends Document {
   updatedAt: Date;
 }
 
-const orderItemSchema = new Schema<IOrderItem>(
-  {
-    productId: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-    name: { type: String, required: true },
-    image: { type: String, required: true },
-    originalPrice: { type: Number, required: true },
-    discountPercent: { type: Number, required: true, default: 0 },
-    salePrice: { type: Number, required: true },
-    quantity: { type: Number, required: true, min: 1 },
-    isReviewed: { type: Boolean, default: false },
+const orderItemSchema = new Schema<IOrderItem>({
+  productId: {
+    type: Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
   },
-);
+  name: { type: String, required: true },
+  image: { type: String, required: true },
+  originalPrice: { type: Number, required: true },
+  discountPercent: { type: Number, required: true, default: 0 },
+  salePrice: { type: Number, required: true },
+  quantity: { type: Number, required: true, min: 1 },
+  isReviewed: { type: Boolean, default: false },
+});
 
 const orderAddressSchema = new Schema<IOrderAddress>(
   {
@@ -83,20 +83,20 @@ const orderAddressSchema = new Schema<IOrderAddress>(
     postalCode: { type: String, required: true },
     country: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderStatusHistorySchema = new Schema<IOrderStatusHistory>(
   {
-    status: { 
-        type: String,
-         enum: ORDER_STATUS_VALUES, 
-         required: true 
-        },
+    status: {
+      type: String,
+      enum: ORDER_STATUS_VALUES,
+      required: true,
+    },
     note: { type: String, default: "" },
     date: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const orderSchema = new Schema<IOrder>(
@@ -110,7 +110,7 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       required: true,
       unique: true,
-      default: () => generateOrderNo()
+      default: () => generateOrderNo(),
     },
     items: {
       type: [orderItemSchema],
@@ -148,10 +148,12 @@ const orderSchema = new Schema<IOrder>(
     deliveryFee: { type: Number, required: true, default: 0 },
     tax: { type: Number, required: true },
     total: { type: Number, required: true },
+    couponCode: { type: String, default: undefined },
+    discountAmount: { type: Number, required: true, default: 0 },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // orderSchema.pre("validate", async function () {

@@ -2,6 +2,9 @@ import CouponModel from "../models/coupon.model";
 import { BadRequestException, NotFoundException } from "../utils/app-error";
 import type { CreateCouponInput } from "../validators/coupon.validator";
 
+
+type DiscountTypeLiteral = "percentage" | "fixed";
+
 export const createCouponService = async (data: CreateCouponInput) => {
   const existing = await CouponModel.findOne({ code: data.code.toUpperCase() });
   if (existing) {
@@ -64,4 +67,53 @@ export const deleteCouponService = async (couponId: string) => {
     throw new NotFoundException("Coupon not found");
   }
   return coupon;
+};
+
+
+export const calculateCouponDiscount = (
+  coupon: { discountType: DiscountTypeLiteral; discountValue: number; maxDiscountAmount?: number },
+  subtotal: number
+) => {
+  let discount =
+    coupon.discountType === "percentage"
+      ? (subtotal * coupon.discountValue) / 100
+      : coupon.discountValue;
+
+  if (coupon.maxDiscountAmount) {
+    discount = Math.min(discount, coupon.maxDiscountAmount);
+  }
+
+  // Never let a fixed-amount coupon discount more than the order is worth
+  return Math.min(discount, subtotal);
+};
+
+export const validateCouponForUserService = async (
+  userId: string,
+  code: string,
+  subtotal: number
+) => {
+  const coupon = await CouponModel.findOne({ code: code.trim().toUpperCase() });
+
+  if (!coupon) {
+    throw new BadRequestException("Invalid coupon code");
+  }
+  if (!coupon.isActive) {
+    throw new BadRequestException("This coupon is no longer active");
+  }
+  if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+    throw new BadRequestException("This coupon has expired");
+  }
+  if (coupon.usedBy.some((id) => id.toString() === userId)) {
+    throw new BadRequestException("You've already used this coupon");
+  }
+
+  const discountAmount = calculateCouponDiscount(coupon, subtotal);
+
+  return {
+    couponId: coupon._id.toString(),
+    code: coupon.code,
+    discountType: coupon.discountType,
+    discountValue: coupon.discountValue,
+    discountAmount,
+  };
 };

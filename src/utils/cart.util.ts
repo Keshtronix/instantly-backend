@@ -12,7 +12,10 @@ type CartTotalsItem = {
   quantity: number;
 };
 
-export const calculateCartTotals = (items: CartTotalsItem[]) => {
+export const calculateCartTotals = (
+  items: CartTotalsItem[],
+  discountAmount: number = 0
+) => {
   const subtotal = items.reduce((sum, item) => {
     return sum + (item.productId?.salePrice ?? 0) * item.quantity;
   }, 0);
@@ -21,13 +24,19 @@ export const calculateCartTotals = (items: CartTotalsItem[]) => {
   const deliveryFee =
     roundedSubtotal >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE;
   const tax = Math.round(roundedSubtotal * TAX_RATE * 100) / 100;
-  const orderTotal =
-    Math.round((roundedSubtotal + deliveryFee + tax) * 100) / 100;
+
+  const roundedDiscount = Math.round(discountAmount * 100) / 100;
+
+  const orderTotal = Math.max(
+    Math.round((roundedSubtotal + deliveryFee + tax - roundedDiscount) * 100) / 100,
+    0
+  );
 
   return {
     subtotal: roundedSubtotal,
     deliveryFee,
     tax,
+    discountAmount: roundedDiscount,
     orderTotal,
     freeDeliveryThreshold: FREE_DELIVERY_THRESHOLD,
   };

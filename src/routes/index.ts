@@ -8,6 +8,7 @@ import addressRoute from "./address.route";
 import orderRoute from "./order.route";
 import reviewRoute from "./review.route";
 import wishlistRoute from "./wishlist.route";
+import couponRoutes from "./coupon.route";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/addresses", addressRoute);
 router.use("/wishlist", wishlistRoute);
 router.use("/orders", orderRoute);
 router.use("/reviews", reviewRoute);
+router.use("/coupons", couponRoutes);
 
 export default router;
