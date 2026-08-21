@@ -15,6 +15,13 @@ import {
 import { passportAuthenticateJwt } from "../config/passport.config";
 import { requireAdmin } from "../middlewares/requireAdmin.middleware";
 
+import {
+  createCouponController,
+  getAllCouponsController,
+  toggleCouponActiveController,
+  deleteCouponController,
+} from "../controllers/coupon.controller";
+
 const adminRoutes = Router();
 
 adminRoutes.use(passportAuthenticateJwt);
@@ -33,5 +40,10 @@ adminRoutes.post(
   uploadProductImagesController
 );
 adminRoutes.post("/products", createProductController);
+
+adminRoutes.post("/coupons", createCouponController);
+adminRoutes.get("/coupons", getAllCouponsController);
+adminRoutes.patch("/coupons/:id/toggle", toggleCouponActiveController);
+adminRoutes.delete("/coupons/:id", deleteCouponController);
 
 export default adminRoutes;
