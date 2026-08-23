@@ -1,5 +1,10 @@
 import UserModel from "../models/user.model";
-import { BadRequestException, UnauthorizedException,NotFoundException } from "../utils/app-error";
+import {
+  BadRequestException,
+  UnauthorizedException,
+  NotFoundException,
+  ForbiddenException,
+} from "../utils/app-error";
 import { RegisterInput, LoginInput } from "../validators/auth.validator";
 import { mergeGuestCartService } from "./cart.service";
 import VerificationCodeModel from "../models/verification.model";
@@ -35,7 +40,7 @@ export const registerService = async (data: RegisterInput) => {
   //   ...verifyEmailTemplate(verificationUrl),
   // });
 
-    await sendEmail({
+  await sendEmail({
     to: "prakhyat333@gmail.com",
     ...verifyEmailTemplate(verificationUrl),
   });
@@ -52,6 +57,16 @@ export const loginService = async ({ email, password }: LoginInput) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     throw new UnauthorizedException("Invalid email or password");
+  }
+
+  if (user.status === "banned") {
+    throw new ForbiddenException(
+      "Your account has been banned. Contact support if you believe this is a mistake.",
+    );
+  }
+
+  if (user.status === "suspended") {
+    throw new ForbiddenException("Your account is temporarily suspended.");
   }
 
   return user;
@@ -76,12 +91,9 @@ export const loginAndMergeGuestCart = async (
   return user;
 };
 
-
-
-
 export const updateUserProfile = async (
   userId: string,
-  data: { name: string; email: string; phone?: string }
+  data: { name: string; email: string; phone?: string },
 ) => {
   const existing = await UserModel.findOne({
     email: data.email,
@@ -94,7 +106,7 @@ export const updateUserProfile = async (
   const updatedUser = await UserModel.findByIdAndUpdate(
     userId,
     { name: data.name, email: data.email, phone: data.phone },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   if (!updatedUser) {

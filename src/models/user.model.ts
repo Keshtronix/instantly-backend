@@ -7,14 +7,16 @@ export interface IUser extends Document {
   email: string;
   password: string;
   isEmailVerified: boolean;
-  role: UserRole
+  role: UserRole;
   phone?: string;
   avatar?: string;
+  status: "active" | "suspended" | "banned";
+  statusReason?: string;
+  statusUpdatedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
-
 
 const userSchema = new Schema<IUser>(
   {
@@ -34,8 +36,9 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       minlength: 6,
+     // select: false,
     },
-     isEmailVerified: {
+    isEmailVerified: {
       type: Boolean,
       default: false,
     },
@@ -52,6 +55,14 @@ const userSchema = new Schema<IUser>(
       type: String,
       default: undefined,
     },
+    status: {
+      type: String,
+      enum: ["active", "suspended", "banned"],
+      default: "active",
+      index: true, // speeds up admin filtering by status
+    },
+    statusReason: { type: String }, // e.g. "Repeated fake orders", optional admin note
+    statusUpdatedAt: { type: Date },
   },
   {
     timestamps: true,
@@ -61,7 +72,7 @@ const userSchema = new Schema<IUser>(
         return ret;
       },
     },
-  }
+  },
 );
 
 userSchema.pre("save", async function () {
@@ -70,7 +81,9 @@ userSchema.pre("save", async function () {
   }
 });
 
-userSchema.methods.comparePassword = async function (candidatePassword: string) {
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string,
+) {
   return compareValue(candidatePassword, this.password);
 };
 

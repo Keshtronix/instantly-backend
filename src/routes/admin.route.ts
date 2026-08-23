@@ -22,12 +22,18 @@ import {
   deleteCouponController,
 } from "../controllers/coupon.controller";
 
+import {
+  getCustomersController,
+  getCustomerByIdController,
+  updateCustomerController,
+  updateCustomerStatusController,
+} from "../controllers/customer.controller";
+
 const adminRoutes = Router();
 
 adminRoutes.use(passportAuthenticateJwt);
 adminRoutes.use(requireAdmin);
 
-adminRoutes.get("/analytics", getAdminAnalyticsController);
 adminRoutes.get("/analytics", getAdminAnalyticsController);
 adminRoutes.post("/ai/generate", generateAIAdminController);
 adminRoutes.get("/orders", getAdminOrdersController);
@@ -45,5 +51,10 @@ adminRoutes.post("/coupons", createCouponController);
 adminRoutes.get("/coupons", getAllCouponsController);
 adminRoutes.patch("/coupons/:id/toggle", toggleCouponActiveController);
 adminRoutes.delete("/coupons/:id", deleteCouponController);
+
+adminRoutes.get("/customers", getCustomersController);
+adminRoutes.get("/customers/:id", getCustomerByIdController);
+adminRoutes.patch("/customers/:id", updateCustomerController);
+adminRoutes.patch("/customers/:id/status", updateCustomerStatusController);
 
 export default adminRoutes;
