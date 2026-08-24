@@ -28,6 +28,19 @@ import {
   updateCustomerController,
   updateCustomerStatusController,
 } from "../controllers/customer.controller";
+import {
+  createCategoryController,
+  deleteCategoryController,
+  getCategoriesController,
+  updateCategoryController,
+} from "../controllers/category.controller";
+
+import {
+  getSubCategoriesController,
+  createSubCategoryController,
+  updateSubCategoryController,
+  deleteSubCategoryController,
+} from "../controllers/subcategory.controller";
 
 const adminRoutes = Router();
 
@@ -43,7 +56,7 @@ adminRoutes.post(
   "/products/upload",
   uploadProductImages,
   validateFilesPresence,
-  uploadProductImagesController
+  uploadProductImagesController,
 );
 adminRoutes.post("/products", createProductController);
 
@@ -56,5 +69,15 @@ adminRoutes.get("/customers", getCustomersController);
 adminRoutes.get("/customers/:id", getCustomerByIdController);
 adminRoutes.patch("/customers/:id", updateCustomerController);
 adminRoutes.patch("/customers/:id/status", updateCustomerStatusController);
+
+adminRoutes.get("/categories", getCategoriesController);
+adminRoutes.post("/categories", createCategoryController);
+adminRoutes.patch("/categories/:id", updateCategoryController);
+adminRoutes.delete("/categories/:id", deleteCategoryController);
+
+adminRoutes.get("/sub-categories", getSubCategoriesController); // ?categoryId=xxx to filter
+adminRoutes.post("/sub-categories", createSubCategoryController);
+adminRoutes.patch("/sub-categories/:id", updateSubCategoryController);
+adminRoutes.delete("/sub-categories/:id", deleteSubCategoryController);
 
 export default adminRoutes;
