@@ -4,10 +4,15 @@ import { HTTPSTATUS } from "../config/http.config";
 import {
   createProductSchema,
   getProductsForAdminSchema,
+  productIdParamSchema,
+  updateProductSchema,
 } from "../validators/product.validator";
 import {
   createProductService,
   getProductsForAdminService,
+  updateProductService,
+  deleteProductService,
+  getProductByIdForAdminService,
 } from "../services/product.service";
 import {
   getAdminAnalyticsService,
@@ -44,6 +49,19 @@ export const getProductsForAdminController = asyncHandler(
     res.status(HTTPSTATUS.OK).json({
       message: "Products retrieved successfully",
       ...result,
+    });
+  }
+);
+
+// brocky update
+export const getProductByIdForAdminController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = productIdParamSchema.parse(req.params);
+    const product = await getProductByIdForAdminService(id);
+
+    res.status(HTTPSTATUS.OK).json({
+      message: "Product retrieved successfully",
+      product,
     });
   }
 );
@@ -108,6 +126,34 @@ export const generateAIAdminController = asyncHandler(
     res.status(HTTPSTATUS.OK).json({
       message: "AI content generated successfully",
       ...result,
+    });
+  }
+);
+
+// brocky update
+// The above code is a controller for admin-related operations in an e-commerce application. It includes functions for creating products, retrieving products for admin, getting analytics, managing orders, uploading product images, and generating AI content. Each function uses asyncHandler to handle asynchronous operations and validate input using Zod schemas. The responses are sent with appropriate HTTP status codes and messages.
+
+// The following code is for updating and deleting products, which was added recently.
+export const updateProductController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = productIdParamSchema.parse(req.params);
+    const data = updateProductSchema.parse(req.body);
+    const product = await updateProductService(id, data);
+
+    res.status(HTTPSTATUS.OK).json({
+      message: "Product updated successfully",
+      product,
+    });
+  }
+);
+
+export const deleteProductController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = productIdParamSchema.parse(req.params);
+    await deleteProductService(id);
+
+    res.status(HTTPSTATUS.OK).json({
+      message: "Product deleted successfully",
     });
   }
 );

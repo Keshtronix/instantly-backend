@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 
 export const getProductsSchema = z.object({
@@ -69,3 +70,14 @@ export const getProductsForAdminSchema = z.object({
 export type GetProductsForAdminInput = z.infer<
   typeof getProductsForAdminSchema
 >;
+
+// brocky update 
+
+export const productIdParamSchema = z.object({
+  id: z.string().refine((val) => mongoose.isValidObjectId(val), {
+    message: "Invalid product ID",
+  }),
+});
+
+// update product schema is the same as create product schema but all fields are optional
+export const updateProductSchema = createProductSchema.partial();

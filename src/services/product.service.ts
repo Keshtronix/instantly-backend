@@ -244,3 +244,55 @@ export const getProductsForAdminService = async (
     },
   };
 };
+
+// Additional services for updating and deleting products can be added here as needed.
+
+export const updateProductService = async (
+  id: string,
+  data: Partial<CreateProductInput>
+) => {
+  const product = await ProductModel.findById(id);
+  if (!product) {
+    throw new NotFoundException("Product not found");
+  }
+
+  if (data.categoryId) {
+    if (!mongoose.isValidObjectId(data.categoryId)) {
+      throw new BadRequestException("Invalid category ID");
+    }
+    const category = await CategoryModel.findById(data.categoryId).lean();
+    if (!category) {
+      throw new BadRequestException("Category not found");
+    }
+  }
+
+  Object.assign(product, data);
+  await product.save();
+
+  return product;
+};
+
+export const deleteProductService = async (id: string) => {
+  const product = await ProductModel.findById(id);
+  if (!product) {
+    throw new NotFoundException("Product not found");
+  }
+
+  await ProductModel.findByIdAndDelete(id);
+  return product;
+};
+
+// Additional service to get a product by ID for admin purposes
+// brocky
+export const getProductByIdForAdminService = async (id: string) => {
+  const product = await ProductModel.findById(id).populate(
+    "categoryId",
+    "name slug"
+  );
+
+  if (!product) {
+    throw new NotFoundException("Product not found");
+  }
+
+  return product;
+};

@@ -1,11 +1,14 @@
 import { Router } from "express";
 import {
   createProductController,
+  deleteProductController,
   generateAIAdminController,
   getAdminAnalyticsController,
   getAdminOrdersController,
+  getProductByIdForAdminController,
   getProductsForAdminController,
   updateOrderStatusController,
+  updateProductController,
   uploadProductImagesController,
 } from "../controllers/admin.controller";
 import {
@@ -58,8 +61,17 @@ adminRoutes.post(
   validateFilesPresence,
   uploadProductImagesController,
 );
-adminRoutes.post("/products", createProductController);
 
+// Product routes
+adminRoutes.post("/products", createProductController);
+// Update and delete product routes
+adminRoutes.patch("/products/:id", updateProductController);
+adminRoutes.delete("/products/:id", deleteProductController);
+// Get product by ID for admin
+adminRoutes.get("/products/:id", getProductByIdForAdminController);
+
+
+// Coupon routes
 adminRoutes.post("/coupons", createCouponController);
 adminRoutes.get("/coupons", getAllCouponsController);
 adminRoutes.patch("/coupons/:id/toggle", toggleCouponActiveController);
