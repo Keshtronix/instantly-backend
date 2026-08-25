@@ -1,5 +1,5 @@
 import SubCategoryModel from "../models/subcategory.model";
-import { NotFoundException } from "../utils/app-error";
+import { NotFoundException  } from "../utils/app-error";
 
 export const getSubCategoriesService = async (categoryId?: string) => {
   const filter = categoryId ? { categoryId } : {};
@@ -38,8 +38,17 @@ export const updateSubCategoryService = async (
   return subCategory;
 };
 
+// export const deleteSubCategoryService = async (id: string) => {
+//   const subCategory = await SubCategoryModel.findByIdAndDelete(id);
+//   if (!subCategory) throw new NotFoundException("Sub-category not found");
+//   return subCategory;
+// };
+
+
 export const deleteSubCategoryService = async (id: string) => {
-  const subCategory = await SubCategoryModel.findByIdAndDelete(id);
+  const subCategory = await SubCategoryModel.findById(id);
   if (!subCategory) throw new NotFoundException("Sub-category not found");
+
+  await SubCategoryModel.findByIdAndDelete(id);
   return subCategory;
 };
