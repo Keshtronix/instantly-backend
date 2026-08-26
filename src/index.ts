@@ -43,11 +43,17 @@ app.use("/api", routes);
 app.use(errorHandler);
 
 // Connect DB on cold start
-if (process.env.VERCEL) {
-  connectDatabase().catch((err) => {
-    console.error("Failed to connect to database on Vercel startup:", err);
+if (process.env.RENDER) {
+  // Render uses serverless-like cold starts, but doesn't have the same 
+  // limitations as Vercel's serverless functions
+  app.listen(envConfig.PORT, async () => {
+    await connectDatabase();
+    console.log(
+      `Server running on port ${envConfig.PORT} in ${envConfig.NODE_ENV} mode on Render`,
+    );
   });
 } else {
+  // For local development and other environments
   app.listen(envConfig.PORT, async () => {
     await connectDatabase();
     console.log(
