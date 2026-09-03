@@ -5,10 +5,14 @@ import {
   registerSchema,
   loginSchema,
   updateProfileSchema,
+  resetPasswordSchema,
+  forgotPasswordSchema,
 } from "../validators/auth.validator";
 import {
+  forgotPasswordService,
   loginAndMergeGuestCart,
   registerAndMergeGuestCart,
+  resetPasswordService,
   updateUserProfile,
 } from "../services/auth.service";
 import {
@@ -96,6 +100,31 @@ export const updateProfileController = asyncHandler(
     return res.status(HTTPSTATUS.OK).json({
       message: "Profile updated successfully",
       user: toAuthUser(user),
+    });
+  },
+);
+
+
+export const forgotPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = forgotPasswordSchema.parse(req.body);
+
+    await forgotPasswordService(email);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "If an account exists for that email, a reset link has been sent.",
+    });
+  },
+);
+
+export const resetPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { code, password } = resetPasswordSchema.parse(req.body);
+
+    await resetPasswordService(code, password);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Password has been reset successfully. Please sign in.",
     });
   },
 );

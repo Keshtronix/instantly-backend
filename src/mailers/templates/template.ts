@@ -32,7 +32,7 @@ export const verifyEmailTemplate = (
   `,
 });
 
-export const passwordResetTemplate = (
+export const resetPasswordTemplate  = (
   url: string,
   brandColor: string = "#2563EB"
 ) => ({

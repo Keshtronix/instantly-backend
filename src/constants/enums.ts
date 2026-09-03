@@ -35,6 +35,11 @@ export const PAYMENT_METHODS = {
   CASH_ON_DELIVERY: "cash_on_delivery",
 } as const;
 
+export enum VerificationEnum {
+  EMAIL_VERIFICATION = "EMAIL_VERIFICATION",
+  PASSWORD_RESET = "PASSWORD_RESET",
+}
+
 export type PaymentMethod = (typeof PAYMENT_METHODS)[keyof typeof PAYMENT_METHODS];
 export const PAYMENT_METHOD_VALUES = Object.values(PAYMENT_METHODS);
 

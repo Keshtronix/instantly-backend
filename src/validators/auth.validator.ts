@@ -19,5 +19,14 @@ export const updateProfileSchema = z.object({
   phone: z.string().trim().min(1, "Phone number is required").optional(),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  code: z.string().min(1),
+  password: z.string().trim().min(8),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

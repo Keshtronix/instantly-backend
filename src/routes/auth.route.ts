@@ -5,6 +5,8 @@ import {
   logoutController,
   authStatusController,
   updateProfileController,
+  forgotPasswordController,
+  resetPasswordController,
 } from "../controllers/auth.controller";
 import { passportAuthenticateJwt } from "../config/passport.config";
 
@@ -15,5 +17,8 @@ authRoutes.post("/login", loginController);
 authRoutes.post("/logout", logoutController);
 authRoutes.get("/status", passportAuthenticateJwt, authStatusController);
 authRoutes.put("/profile", passportAuthenticateJwt, updateProfileController);
+
+authRoutes.post("/forgot-password", forgotPasswordController);
+authRoutes.post("/reset-password", resetPasswordController);
 
 export default authRoutes;

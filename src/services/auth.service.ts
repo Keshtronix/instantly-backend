@@ -11,7 +11,7 @@ import VerificationCodeModel from "../models/verification.model";
 import { VerificationEnum } from "../constants/verification-code.enum";
 import { envConfig } from "../config/env.config";
 import { sendEmail } from "../mailers/mailer";
-import { verifyEmailTemplate } from "../mailers/templates/template";
+import { verifyEmailTemplate ,resetPasswordTemplate} from "../mailers/templates/template";
 
 import { fortyFiveMinutesFromNow } from "../utils/date-time";
 
@@ -114,4 +114,61 @@ export const updateUserProfile = async (
   }
 
   return updatedUser;
+};
+
+
+
+
+//import { thirtyMinutesFromNow } from "../utils/date-time";
+//import { resetPasswordTemplate } from "../mailers/templates/template";
+
+export const forgotPasswordService = async (email: string) => {
+  const user = await UserModel.findOne({ email });
+
+  // Don't reveal whether the email exists — just no-op if not found.
+  if (!user) return;
+
+  // Invalidate any previous reset codes for this user
+  await VerificationCodeModel.deleteMany({
+    userId: user._id,
+    type: VerificationEnum.PASSWORD_RESET,
+  });
+
+  const verification = await VerificationCodeModel.create({
+    userId: user._id,
+    type: VerificationEnum.PASSWORD_RESET,
+    expiresAt: fortyFiveMinutesFromNow(),
+  });
+
+  const resetUrl = `${envConfig.FRONTEND_ORIGIN}/reset-password?code=${verification.code}`;
+
+  await sendEmail({
+    //to: user.email,
+    to: "prakhyat333@gmail.com",
+    ...resetPasswordTemplate(resetUrl),
+  });
+};
+
+export const resetPasswordService = async (code: string, password: string) => {
+  const verification = await VerificationCodeModel.findOne({
+    code,
+    type: VerificationEnum.PASSWORD_RESET,
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!verification) {
+    throw new BadRequestException("Reset link is invalid or has expired");
+  }
+
+  const user = await UserModel.findById(verification.userId);
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+
+  user.password = password; // relies on the same pre-save hashing hook comparePassword pairs with
+  await user.save();
+
+  await verification.deleteOne();
+
+  return user;
 };
