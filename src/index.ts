@@ -15,10 +15,26 @@ const app = express();
 
 app.use("/api/webhook", webhookRouter);
 
+// app.use(
+//   cors({
+//     origin: envConfig.FRONTEND_ORIGIN,
+//     methods: ["GET", "POST", "PUT","PATCH", "DELETE"],
+//     credentials: true,
+//   }),
+// );
+
+const allowedOrigins = envConfig.FRONTEND_ORIGIN.split(",").map((o) => o.trim());
+
 app.use(
   cors({
-    origin: envConfig.FRONTEND_ORIGIN,
-    methods: ["GET", "POST", "PUT","PATCH", "DELETE"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   }),
 );
